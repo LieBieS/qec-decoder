@@ -62,7 +62,7 @@ advantage on real device noise.
 | Script | What it does |
 |---|---|
 | `qec_decoder.py` | stim surface-code circuit → sampled syndromes → MWPM vs MLP/transformer logical error rates. Flags: `--distance --rounds --noise --model {mlp,transformer,both} --mismatch` |
-| `calibrated_baseline.py` | Adds the honest classical adversary: MWPM re-weighted by fitting edge probabilities from syndrome co-occurrence (Spitz et al. 1712.02360), plus biased-noise injection via `PAULI_CHANNEL_1`. Flags: `--eta --hetero --noise --distance --memory {x,z}` |
+| `calibrated_baseline.py` | Adds the honest classical adversary: MWPM re-weighted by fitting edge probabilities from syndrome co-occurrence (Spitz et al. 1712.02360), plus biased-noise injection via `PAULI_CHANNEL_1` and correlated `CORRELATED_ERROR` bursts. Flags: `--eta --hetero --burst --mlp --noise --distance --memory {x,z}` |
 | `viz_decoder.py` | One-shot decode picture: fired defects by round, matched pairs, boundary matches, plus a live naive-vs-calibrated LER chart |
 | `test_e2e.py` | End-to-end invariants: zero-noise sanity, depolarising sanity, biased-DEM validity, the robustness finding as a regression test |
 
@@ -79,6 +79,12 @@ Weight-miscalibration study (calibrated_baseline.py):
   Uniform X-bias eta=100, d=3:     naive 5.74% = oracle 5.74%
   Hetero X/Z-bias eta=100, d=3:    naive 4.57% = oracle 4.57%
   Hetero X/Z-bias eta=100, d=5:    naive 13.55%, oracle 13.29% (~2% rel)
+
+Correlated XX bursts (p_burst=0.15, p_base=0.001, d=3, 3 seeds):
+  naive MWPM:     3.04%  (boundary broken)
+  MLP learned:    1.81%  (recovers ~60% of naive->oracle gap,
+                          McNemar p<0.001 per seed)
+  oracle MWPM:    1.00%
 ```
 
 **Honest reading.** Under correctly-calibrated i.i.d. depolarising noise,
@@ -87,7 +93,10 @@ is the expected result, not a failure. More interesting: MWPM's logical
 error rate is essentially insensitive to edge-weight miscalibration
 whenever the true noise is still edge-representable (uniform AND
 alternating bias). Weight fitting only has room to matter where noise is
-not edge-representable: multi-body correlated faults. See `DESIGN.md`.
+not edge-representable: multi-body correlated faults. Measured both
+sides of that boundary now: under correlated XX bursts a small MLP beats
+naive MWPM by ~40% relative with McNemar p<0.001, recovering about 60%
+of what the oracle gets back. See `DESIGN.md`.
 
 ## Run
 

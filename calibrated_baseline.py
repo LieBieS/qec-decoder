@@ -75,6 +75,33 @@ def biased_circuit(distance, rounds, noise, eta, memory="z", hetero=False):
     return stim.Circuit(text)
 
 
+def burst_circuit(distance, rounds, noise, p_burst, memory="z"):
+    """Correlated multi-qubit faults: the regime the matching graph
+    cannot represent. Inserts CORRELATED_ERROR XX pairs on neighbouring
+    data qubits just before each measurement block, so one physical
+    mechanism fires >2 detectors simultaneously.
+
+    Data qubits identified from the before-round DEPOLARIZE1 target list.
+    Neighbours approximated by consecutive qubit indices (synthetic but
+    honest, labelled as such)."""
+    text = str(build_circuit(distance, rounds, noise, memory))
+    # data qubits = targets of the first before-round DEPOLARIZE1
+    m = re.search(r"DEPOLARIZE1\([^)]+\)\s+([\d ]+)", text)
+    dq = [int(q) for q in m.group(1).split()]
+    pairs = list(zip(dq[::2], dq[1::2]))          # adjacent-index pairs
+    lines = text.splitlines()
+    out, n_ins = [], 0
+    for ln in lines:
+        if re.match(r"\s*M\s", ln):               # inject before each M block
+            for a, b in pairs:
+                out.append(f"        CORRELATED_ERROR({p_burst}) X{a} X{b}")
+            n_ins += len(pairs)
+        out.append(ln)
+    print(f"burst injection: {n_ins} CORRELATED_ERROR XX pairs at p={p_burst} "
+          f"across {len(pairs)} qubit pairs")
+    return stim.Circuit("\n".join(out))
+
+
 def sample(circuit, shots):
     sampler = circuit.compile_detector_sampler()
     det, obs = sampler.sample(shots, separate_observables=True)
@@ -123,16 +150,25 @@ def main():
     p.add_argument("--hetero", action="store_true",
                    help="alternate X/Z bias per qubit = structural mismatch")
     p.add_argument("--memory", default="z", choices=["x", "z"])
+    p.add_argument("--burst", type=float, default=0.0,
+                   help="correlated XX fault probability (0 = off)")
+    p.add_argument("--mlp", action="store_true",
+                   help="also train the MLP learned decoder")
     p.add_argument("--shots", type=int, default=200_000)
     args = p.parse_args()
 
     np.random.seed(SEED)
     nominal = build_circuit(args.distance, args.rounds, args.noise,
                             memory=args.memory)
-    truth = (nominal if args.eta == 1.0 else
-             biased_circuit(args.distance, args.rounds, args.noise,
-                            args.eta, memory=args.memory,
-                            hetero=args.hetero))
+    if args.burst > 0:
+        truth = burst_circuit(args.distance, args.rounds, args.noise,
+                              args.burst, memory=args.memory)
+    elif args.eta == 1.0:
+        truth = nominal
+    else:
+        truth = biased_circuit(args.distance, args.rounds, args.noise,
+                               args.eta, memory=args.memory,
+                               hetero=args.hetero)
 
     det, obs = sample(truth, args.shots)
     split = args.shots // 2
@@ -146,13 +182,30 @@ def main():
     m_cal = calibrated_matching(nominal, det_cal)
     pred_cal = m_cal.decode_batch(det_te.astype(bool))[:, 0]
     cal_err = float((pred_cal != obs_te.astype(bool)).mean())
-    informed = mwpm(truth, det_te, obs_te)
+    try:
+        informed = mwpm(truth, det_te, obs_te)
+    except Exception:
+        informed = None  # non-graphlike DEM: no informed MWPM exists
 
     print(f"naive MWPM (depolarising prior):   {naive:.4f}")
     print(f"calibrated MWPM (fitted from data):{cal_err:>9.4f}")
-    print(f"informed MWPM (oracle true DEM):   {informed:.4f}")
-    print(f"\ncalibration recovers {100 * (naive - cal_err) / max(naive - informed, 1e-9):.0f}% "
-          f"of the naive->oracle gap")
+    if informed is None:
+        print("informed MWPM (oracle true DEM):   N/A (non-graphlike DEM, "
+              "no matching representation)")
+    else:
+        print(f"informed MWPM (oracle true DEM):   {informed:.4f}")
+
+    if args.mlp:
+        from qec_decoder import MLPDecoder, train_decoder
+        det_f = det.astype(np.float32)
+        obs_f = obs.astype(np.float32)
+        mlp = MLPDecoder(truth.num_detectors)
+        err, t = train_decoder(mlp, det_f[:split], obs_f[:split],
+                               det_f[split:], obs_f[split:], epochs=10)
+        print(f"MLP learned decoder:               {err:.4f}  ({t:.0f}s)")
+
+    gap = (naive - cal_err)
+    print(f"\ncalibrated-vs-naive delta: {gap:+.4f}")
 
 
 if __name__ == "__main__":
