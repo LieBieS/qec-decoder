@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>What are we solving — ML decoders for quantum error correction</title>
+<title>What I am solving, ML decoders for quantum error correction</title>
 <style>
   :root {
     --ink: #1a1d24; --muted: #5a6270; --line: #e4e7ec;
@@ -76,89 +76,102 @@
   <div class="kicker">qec-decoder · one-pager · Nov 2026</div>
   <h1>Can a neural network learn to fix a quantum computer's errors better than the algorithm everyone uses?</h1>
   <p class="lede">
-    Quantum computers don't fail loudly — they fail constantly. Every few hundred
-    operations, a qubit decoheres and the computation corrupts. The only path to
-    useful quantum computing runs through error correction — and error correction
-    lives or dies on a piece of software called a <strong>decoder</strong>.
-    This project asks whether machine learning can beat the decoder everyone trusts.
+    Quantum computers don't fail loudly, they fail constantly. Every few
+    hundred operations a qubit decoheres and the computation corrupts.
+    The only path to useful quantum computing runs through error
+    correction, and error correction lives or dies on a piece of software
+    called a <strong>decoder</strong>. This project asks whether machine
+    learning can beat the decoder everyone trusts.
   </p>
 
   <h2>The problem, plainly</h2>
   <p>
-    A quantum error-correcting code spreads one logical qubit across many noisy
-    physical qubits and repeatedly measures <em>syndromes</em> — error fingerprints.
-    The <strong>decoder</strong> is the algorithm that reads each syndrome pattern and
-    guesses which physical errors caused it. Guess right and the computation survives;
-    guess wrong and the logical qubit corrupts.
+    A quantum error-correcting code spreads one logical qubit across many
+    noisy physical qubits and repeatedly measures syndromes, the error's
+    fingerprints. The <strong>decoder</strong> is the algorithm that reads
+    each syndrome pattern and guesses which physical errors caused it.
+    Guess right and the computation survives; guess wrong and the logical
+    qubit corrupts.
   </p>
   <p>
-    Today's workhorse is <strong>minimum-weight perfect matching (MWPM)</strong> — it
-    models errors as edges on a graph and finds the cheapest set explaining the
-    syndrome. It's fast and near-optimal — <em>as long as its internal picture of the
-    noise is right</em>. On real hardware, the noise is correlated, biased, and
-    drifting. Google's AlphaQubit showed a neural decoder beating MWPM on real
-    machine data for exactly this reason.
+    Today's workhorse is <strong>minimum-weight perfect matching
+    (MWPM)</strong>. It models errors as edges on a graph and finds the
+    cheapest set explaining the syndrome. It's fast and near-optimal, as
+    long as its internal picture of the noise is right. On real hardware
+    the noise is correlated, biased and drifting. Google's AlphaQubit
+    showed a neural decoder beating MWPM on real machine data for exactly
+    this reason.
   </p>
 
-  <h2>What we built</h2>
+  <h2>What I built</h2>
   <p>
     A complete decoder-benchmarking pipeline in <code>stim</code> +
-    <code>PyMatching</code> + <code>PyTorch</code>: generates rotated surface-code
-    memory experiments, samples error syndromes, and runs decoders head-to-head on
-    identical data — plus a Spitz-style calibrator that fits MWPM's graph weights
-    from the syndrome data itself and a biased/correlated noise injector.
+    <code>PyMatching</code> + <code>PyTorch</code>: generates rotated
+    surface-code memory experiments, samples error syndromes, and runs
+    decoders head-to-head on identical data. On top of that, a
+    Spitz-style calibrator that fits MWPM's graph weights from the
+    syndrome data itself, a biased-noise injector, a single-shot decode
+    visualiser and an end-to-end test suite.
   </p>
 
-  <h2>What we've measured so far</h2>
+  <h2>What I've measured so far</h2>
 
   <div class="finding"><span class="tag neg">Negative</span>
-    <p>Under correctly-calibrated depolarizing noise, a learned decoder
-    (MLP 12.5%, transformer 11.9%) loses to MWPM (5.2%) — as the theory predicts.
-    "ML beats MWPM" is not the result here.</p></div>
+    <p>Under correctly-calibrated depolarising noise, a learned decoder
+    (MLP 12.5%, transformer 11.9%) loses to MWPM (5.2%), as theory
+    predicts. "ML beats MWPM" is not the result here.</p></div>
 
   <div class="finding"><span class="tag neg">Negative</span>
-    <p>MWPM is shockingly robust to a wrong noise model. A 4× rate miscalibration,
-    uniform X-bias at η=100, and alternating X/Z-bias all leave its error rate
-    essentially untouched — the oracle only gains ~2%.</p></div>
+    <p>MWPM is shockingly robust to a wrong noise model. A 4x rate
+    miscalibration, uniform X-bias at eta=100 and alternating X/Z-bias
+    all leave its error rate essentially untouched; the oracle only
+    gains ~2%.</p></div>
 
   <div class="finding"><span class="tag pos">Key insight</span>
     <p>Reweighting can't help because biased noise is still
-    <em>edge-representable</em> — it fits on MWPM's graph. The only room for a learned
-    decoder is noise the graph <strong>can't</strong> represent: multi-qubit correlated
-    faults (leakage, crosstalk, bursts). That's exactly what real hardware produces —
-    and why AlphaQubit's advantage showed up on real Sycamore data, not synthetic noise.</p></div>
+    edge-representable: it fits on MWPM's graph. The only room for a
+    learned decoder is noise the graph <strong>can't</strong> represent:
+    multi-qubit correlated faults (leakage, crosstalk, bursts). That's
+    exactly what real hardware produces, and why AlphaQubit's advantage
+    showed up on real Sycamore data rather than synthetic noise.</p></div>
 
-  <h2>So what are we solving?</h2>
+  <h2>So what am I solving?</h2>
   <div class="thesis">
-    <strong>The noise-model gap.</strong> Every decoder trusts a model of the noise.
-    On real quantum computers that model is wrong — but the syndrome data itself
-    contains the truth. We are quantifying precisely when a learned or
-    data-calibrated decoder beats a classical one, and building the tools that make
-    that comparison honest.
+    <strong>The noise-model gap.</strong> Every decoder trusts a model of
+    the noise. On real quantum computers that model is wrong, but the
+    syndrome data itself contains the truth. I'm quantifying precisely
+    when a learned or data-calibrated decoder beats a classical one, and
+    building the tools that make that comparison honest.
   </div>
 
   <h2>Why it matters beyond the laptop</h2>
   <ul>
-    <li><strong>Field direction:</strong> every hardware platform crossed into working
-      QEC in 2025–26 — the bottleneck has shifted to decoding under real noise.
-      "QEC software engineer" is now a literal job title.</li>
-    <li><strong>Active ecosystem:</strong> NVIDIA ships a CNN pre-decoder + PyMatching
-      pipeline; Riverlane's Deltakit fund pays for exactly this class of feature.
-      Our issue <a href="https://github.com/Deltakit/deltakit/issues/435">Deltakit#435</a>
-      proposes the calibration utility as an upstream feature.</li>
-    <li><strong>The honest niche:</strong> a rigorous, open, calibrated-baseline
-      comparison across correlated noise — the experiment nobody has cleanly
-      published at accessible scale.</li>
+    <li><strong>Field direction:</strong> every hardware platform crossed
+      into working QEC in 2025-26, so the bottleneck has shifted to
+      decoding under real noise. "QEC software engineer" is now a literal
+      job title.</li>
+    <li><strong>Active ecosystem:</strong> NVIDIA ships a CNN pre-decoder
+      plus PyMatching pipeline; Riverlane's Deltakit fund pays for
+      exactly this class of feature. My issue
+      <a href="https://github.com/Deltakit/deltakit/issues/435">Deltakit#435</a>
+      proposes the calibration utility as an upstream feature, and the
+      #422 threshold proposal's author is already coordinating on a
+      shared data format.</li>
+    <li><strong>The honest niche:</strong> a rigorous, open,
+      calibrated-baseline comparison across correlated noise, the
+      experiment nobody has cleanly published at accessible scale.</li>
   </ul>
 
   <h2>Next</h2>
   <div class="finding"><span class="tag next">Next</span>
-    <p><strong>Correlated/burst noise injection</strong> — errors that flip multiple
-    qubits in a pattern no edge graph can represent. If MWPM degrades there and the
-    learned decoder holds, that's the first real result.</p></div>
+    <p><strong>Correlated/burst noise injection:</strong> errors that
+    flip multiple qubits in a pattern no edge graph can represent. If
+    MWPM degrades there and the learned decoder holds, that's the first
+    real result.</p></div>
   <div class="finding"><span class="tag next">Then</span>
-    <p>Threshold curves across distances → findings writeup → the merged upstream
-    feature that turns the project into credibility.</p></div>
+    <p>Threshold curves across distances (doubling as the promised #422
+    dataset), a findings writeup, and the merged upstream feature that
+    turns the project into credibility.</p></div>
 
   <div class="foot">
     Repo: <a href="https://github.com/LieBieS/qec-decoder">github.com/LieBieS/qec-decoder</a>

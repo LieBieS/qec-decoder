@@ -4,7 +4,7 @@ The question: can a neural network learn to decode error syndromes
 (detection events) better than minimum-weight perfect matching?
 
 - stim generates a rotated surface code memory-Z experiment with
-  depolarizing noise and samples detection events + the true observable flip
+  depolarising noise and samples detection events + the true observable flip
 - pymatching decodes with MWPM -> classical baseline logical error rate
 - torch models (MLP, tiny transformer) decode -> ML logical error rate
 
@@ -138,7 +138,7 @@ def main():
     det_tr, obs_tr = sample(circuit, args.train_shots)
     det_te, obs_te = sample(circuit, args.test_shots)
 
-    # MWPM baseline — optionally miscalibrated
+    # MWPM baseline, optionally miscalibrated
     dem_circuit = (circuit if args.mismatch is None else
                    build_circuit(args.distance, args.rounds, args.mismatch))
     mwpm_err = mwpm_error_rate(dem_circuit, det_te, obs_te)
@@ -153,8 +153,8 @@ def main():
                                epochs=args.epochs)
         print(f"  {name} logical error rate: {err:.4f}  ({t:.0f}s)\n")
 
-    print("note: with correctly-calibrated depolarizing noise MWPM is "
-          "near-optimal — parity is the honest result. Try --mismatch "
+    print("note: with correctly-calibrated depolarising noise MWPM is "
+          "near-optimal, parity is the honest result. Try --mismatch "
           "0.01 to simulate real-hardware miscalibration.")
 
 

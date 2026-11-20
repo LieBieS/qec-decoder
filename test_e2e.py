@@ -1,9 +1,9 @@
-"""End-to-end pipeline test — exercises the whole stack and asserts
+"""End-to-end pipeline test: exercises the whole stack and asserts
 invariants, not just "it ran."
 
   T1  zero-noise circuit -> every decoder returns ~0 logical errors
       (if this fails, the harness itself is broken)
-  T2  depolarizing: calibrated MWPM ~= naive ~= informed
+  T2  depolarising: calibrated MWPM ~= naive ~= informed
       (calibration must not hurt a correct prior)
   T3  biased circuit builds, DEM decomposes, LER is sane
   T4  biased-noise data -> calibrated MWPM within tolerance of naive
@@ -42,9 +42,9 @@ mwpm_ler = mwpm(c, det, obs)
 check("MWPM zero LER", mwpm_ler == 0.0, f"({mwpm_ler})")
 check("no observable flips", obs.mean() == 0.0)
 check("no detection events", det.mean() == 0.0)
-# NB: calibration is undefined at zero noise — empty DEM has no graph
+# NB: calibration is undefined at zero noise: empty DEM has no graph
 
-print("\nT2: depolarizing sanity (p=0.005, d=3)")
+print("\nT2: depolarising sanity (p=0.005, d=3)")
 nom = build_circuit(3, 9, 0.005)
 det, obs = sample(nom, SHOTS)
 te = slice(SHOTS // 2, None)
@@ -66,7 +66,7 @@ except Exception as e:
     print("   DEM error:", e)
 check("biased DEM decomposes for PyMatching", dem_ok)
 
-print("\nT4: edge-representable mismatch — calibration is a no-op "
+print("\nT4: edge-representable mismatch, calibration is a no-op "
       "(measured finding as regression test)")
 det, obs = sample(bc, SHOTS)
 naive_b = mwpm(nom, det[te], obs[te])

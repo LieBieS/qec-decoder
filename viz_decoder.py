@@ -1,4 +1,4 @@
-"""Watch the decoder work — surface-code syndrome visualization.
+"""Watch the decoder work: surface-code syndrome visualisation.
 
 Panel grid: one subplot per syndrome round (detector time coordinate),
 showing the code lattice, which detectors fired in one sampled shot, and
@@ -89,7 +89,7 @@ def main():
                         textcoords="offset points", xytext=(8, 8),
                         fontsize=9, color="#5a6270")
     ax_lat.set_aspect("equal")
-    ax_lat.set_title("syndrome lattice — defects (purple, labeled by round),\n"
+    ax_lat.set_title("syndrome lattice: defects (purple, labelled by round),\n"
                      "MWPM matched pairs (red), boundary matches (rings)",
                      fontsize=11)
     ax_lat.axis("off")
@@ -111,7 +111,7 @@ def main():
 
     fig.suptitle(
         f"rotated memory-Z d={args.distance} r={args.rounds} "
-        f"p={args.noise} eta={args.eta} hetero={args.hetero} — one shot decode",
+        f"p={args.noise} eta={args.eta} hetero={args.hetero}, one shot decode",
         fontsize=12)
     fig.tight_layout()
     out = "results/decoder_viz.png"

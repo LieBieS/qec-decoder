@@ -1,4 +1,4 @@
-"""E0.5/E1: data-calibrated MWPM — the honest classical adversary.
+"""E0.5/E1: data-calibrated MWPM, the honest classical adversary.
 
 Fits matching-graph edge weights from sampled syndrome data alone
 (Spitz et al. arXiv:1712.02360): for each interior edge (i,j) the defect
@@ -8,7 +8,7 @@ co-occurrence rate identifies its error probability via
 
 which is exact in the single-edge limit and a good approximation when
 marginals stay small. Boundary edges (single-detector) can't be estimated
-from co-occurrence and keep nominal weights — noted limitation.
+from co-occurrence and keep nominal weights (noted limitation).
 
 Also injects biased noise: stim has no bias parameter on generated
 circuits, so DEPOLARIZE1(p) is text-replaced with a biased
@@ -16,9 +16,9 @@ PAULI_CHANNEL_1(px, py, pz) preserving total rate:
     px = p·η/(η+2),  py = pz = p/(η+2)      (η = X:other ratio)
 
 Three decoders on identical shots:
-  naive      — MWPM on the nominal depolarizing DEM
-  calibrated — MWPM re-weighted from the sampled data
-  informed   — MWPM on the true generating DEM (oracle upper bound)
+  naive      : MWPM on the nominal depolarising DEM
+  calibrated : MWPM re-weighted from the sampled data
+  informed   : MWPM on the true generating DEM (oracle upper bound)
 """
 
 import argparse
@@ -46,9 +46,9 @@ def build_circuit(distance, rounds, noise, memory="z"):
 
 def biased_circuit(distance, rounds, noise, eta, memory="z", hetero=False):
     """Replace DEPOLARIZE1 with biased PAULI_CHANNEL_1 at total rate p.
-    hetero=False: uniform X-bias (all edges shift identically — expected
+    hetero=False: uniform X-bias (all edges shift identically, expected
     to NOT hurt MWPM, verified). hetero=True: alternate X-bias/Z-bias per
-    qubit — a structural mismatch where uniform weights are relatively
+    qubit, a structural mismatch where uniform weights are relatively
     wrong edge-to-edge."""
     px = noise * eta / (eta + 2)
     po = noise / (eta + 2)
@@ -119,7 +119,7 @@ def main():
     p.add_argument("--rounds", type=int, default=9)
     p.add_argument("--noise", type=float, default=0.005)
     p.add_argument("--eta", type=float, default=100.0,
-                   help="bias ratio (1.0 = depolarizing sanity check)")
+                   help="bias ratio (1.0 = depolarising sanity check)")
     p.add_argument("--hetero", action="store_true",
                    help="alternate X/Z bias per qubit = structural mismatch")
     p.add_argument("--memory", default="z", choices=["x", "z"])
@@ -148,7 +148,7 @@ def main():
     cal_err = float((pred_cal != obs_te.astype(bool)).mean())
     informed = mwpm(truth, det_te, obs_te)
 
-    print(f"naive MWPM (depolarizing prior):   {naive:.4f}")
+    print(f"naive MWPM (depolarising prior):   {naive:.4f}")
     print(f"calibrated MWPM (fitted from data):{cal_err:>9.4f}")
     print(f"informed MWPM (oracle true DEM):   {informed:.4f}")
     print(f"\ncalibration recovers {100 * (naive - cal_err) / max(naive - informed, 1e-9):.0f}% "
