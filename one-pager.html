@@ -1,0 +1,171 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>What are we solving — ML decoders for quantum error correction</title>
+<style>
+  :root {
+    --ink: #1a1d24; --muted: #5a6270; --line: #e4e7ec;
+    --accent: #7c3aed; --accent-soft: #f3efff;
+    --warn: #b45309; --good: #047857; --bg: #fbfbfd;
+  }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body {
+    font: 16px/1.6 -apple-system, "SF Pro Text", "Segoe UI", sans-serif;
+    color: var(--ink); background: var(--bg);
+  }
+  .page { max-width: 860px; margin: 0 auto; padding: 64px 32px 80px; }
+
+  .kicker {
+    font-size: 12px; font-weight: 700; letter-spacing: .14em;
+    text-transform: uppercase; color: var(--accent); margin-bottom: 14px;
+  }
+  h1 { font-size: 38px; line-height: 1.15; letter-spacing: -.02em; margin-bottom: 18px; }
+  .lede { font-size: 19px; color: var(--muted); max-width: 640px; margin-bottom: 56px; }
+  h2 {
+    font-size: 21px; letter-spacing: -.01em; margin: 48px 0 14px;
+    padding-top: 28px; border-top: 1px solid var(--line);
+  }
+  h2:first-of-type { border-top: none; padding-top: 0; }
+  p { margin-bottom: 14px; }
+  strong { font-weight: 650; }
+
+  .thesis {
+    background: var(--accent-soft); border-left: 3px solid var(--accent);
+    padding: 20px 24px; border-radius: 0 10px 10px 0; margin: 20px 0;
+    font-size: 17px;
+  }
+
+  table { width: 100%; border-collapse: collapse; margin: 16px 0 20px; font-size: 14.5px; }
+  th {
+    text-align: left; font-size: 11.5px; letter-spacing: .06em;
+    text-transform: uppercase; color: var(--muted);
+    border-bottom: 2px solid var(--ink); padding: 8px 10px;
+  }
+  td { padding: 9px 10px; border-bottom: 1px solid var(--line); }
+  td.num { font-variant-numeric: tabular-nums; font-weight: 600; }
+
+  .finding {
+    display: flex; gap: 14px; margin: 14px 0; align-items: baseline;
+  }
+  .finding .tag {
+    flex: none; font-size: 11px; font-weight: 700; letter-spacing: .05em;
+    text-transform: uppercase; padding: 3px 9px; border-radius: 20px; min-width: 74px; text-align: center;
+  }
+  .tag.neg { background: #fef3c7; color: var(--warn); }
+  .tag.pos { background: #d1fae5; color: var(--good); }
+  .tag.next { background: var(--accent-soft); color: var(--accent); }
+
+  ul { margin: 8px 0 16px 20px; }
+  li { margin-bottom: 7px; }
+  code {
+    font: 13.5px "SF Mono", Menlo, monospace; background: #f0f1f4;
+    padding: 2px 6px; border-radius: 5px;
+  }
+  .foot {
+    margin-top: 60px; padding-top: 20px; border-top: 1px solid var(--line);
+    font-size: 13px; color: var(--muted);
+  }
+  a { color: var(--accent); text-decoration: none; }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="kicker">qec-decoder · one-pager · Nov 2026</div>
+  <h1>Can a neural network learn to fix a quantum computer's errors better than the algorithm everyone uses?</h1>
+  <p class="lede">
+    Quantum computers don't fail loudly — they fail constantly. Every few hundred
+    operations, a qubit decoheres and the computation corrupts. The only path to
+    useful quantum computing runs through error correction — and error correction
+    lives or dies on a piece of software called a <strong>decoder</strong>.
+    This project asks whether machine learning can beat the decoder everyone trusts.
+  </p>
+
+  <h2>The problem, plainly</h2>
+  <p>
+    A quantum error-correcting code spreads one logical qubit across many noisy
+    physical qubits and repeatedly measures <em>syndromes</em> — error fingerprints.
+    The <strong>decoder</strong> is the algorithm that reads each syndrome pattern and
+    guesses which physical errors caused it. Guess right and the computation survives;
+    guess wrong and the logical qubit corrupts.
+  </p>
+  <p>
+    Today's workhorse is <strong>minimum-weight perfect matching (MWPM)</strong> — it
+    models errors as edges on a graph and finds the cheapest set explaining the
+    syndrome. It's fast and near-optimal — <em>as long as its internal picture of the
+    noise is right</em>. On real hardware, the noise is correlated, biased, and
+    drifting. Google's AlphaQubit showed a neural decoder beating MWPM on real
+    machine data for exactly this reason.
+  </p>
+
+  <h2>What we built</h2>
+  <p>
+    A complete decoder-benchmarking pipeline in <code>stim</code> +
+    <code>PyMatching</code> + <code>PyTorch</code>: generates rotated surface-code
+    memory experiments, samples error syndromes, and runs decoders head-to-head on
+    identical data — plus a Spitz-style calibrator that fits MWPM's graph weights
+    from the syndrome data itself and a biased/correlated noise injector.
+  </p>
+
+  <h2>What we've measured so far</h2>
+
+  <div class="finding"><span class="tag neg">Negative</span>
+    <p>Under correctly-calibrated depolarizing noise, a learned decoder
+    (MLP 12.5%, transformer 11.9%) loses to MWPM (5.2%) — as the theory predicts.
+    "ML beats MWPM" is not the result here.</p></div>
+
+  <div class="finding"><span class="tag neg">Negative</span>
+    <p>MWPM is shockingly robust to a wrong noise model. A 4× rate miscalibration,
+    uniform X-bias at η=100, and alternating X/Z-bias all leave its error rate
+    essentially untouched — the oracle only gains ~2%.</p></div>
+
+  <div class="finding"><span class="tag pos">Key insight</span>
+    <p>Reweighting can't help because biased noise is still
+    <em>edge-representable</em> — it fits on MWPM's graph. The only room for a learned
+    decoder is noise the graph <strong>can't</strong> represent: multi-qubit correlated
+    faults (leakage, crosstalk, bursts). That's exactly what real hardware produces —
+    and why AlphaQubit's advantage showed up on real Sycamore data, not synthetic noise.</p></div>
+
+  <h2>So what are we solving?</h2>
+  <div class="thesis">
+    <strong>The noise-model gap.</strong> Every decoder trusts a model of the noise.
+    On real quantum computers that model is wrong — but the syndrome data itself
+    contains the truth. We are quantifying precisely when a learned or
+    data-calibrated decoder beats a classical one, and building the tools that make
+    that comparison honest.
+  </div>
+
+  <h2>Why it matters beyond the laptop</h2>
+  <ul>
+    <li><strong>Field direction:</strong> every hardware platform crossed into working
+      QEC in 2025–26 — the bottleneck has shifted to decoding under real noise.
+      "QEC software engineer" is now a literal job title.</li>
+    <li><strong>Active ecosystem:</strong> NVIDIA ships a CNN pre-decoder + PyMatching
+      pipeline; Riverlane's Deltakit fund pays for exactly this class of feature.
+      Our issue <a href="https://github.com/Deltakit/deltakit/issues/435">Deltakit#435</a>
+      proposes the calibration utility as an upstream feature.</li>
+    <li><strong>The honest niche:</strong> a rigorous, open, calibrated-baseline
+      comparison across correlated noise — the experiment nobody has cleanly
+      published at accessible scale.</li>
+  </ul>
+
+  <h2>Next</h2>
+  <div class="finding"><span class="tag next">Next</span>
+    <p><strong>Correlated/burst noise injection</strong> — errors that flip multiple
+    qubits in a pattern no edge graph can represent. If MWPM degrades there and the
+    learned decoder holds, that's the first real result.</p></div>
+  <div class="finding"><span class="tag next">Then</span>
+    <p>Threshold curves across distances → findings writeup → the merged upstream
+    feature that turns the project into credibility.</p></div>
+
+  <div class="foot">
+    Repo: <a href="https://github.com/LieBieS/qec-decoder">github.com/LieBieS/qec-decoder</a>
+    · Stack: stim · PyMatching · PyTorch ·
+    Part of a three-thread portfolio (impact wedge / quantum research / PQC watch)
+  </div>
+
+</div>
+</body>
+</html>
