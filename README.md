@@ -7,6 +7,56 @@ The question: under which noise conditions can a learned (or
 data-calibrated) decoder beat minimum-weight perfect matching — the
 classical decoder everyone uses?
 
+## The problem
+
+A logical qubit survives only if the decoder guesses the right errors:
+
+```mermaid
+flowchart LR
+    E[physical errors<br/>decoherence, gate faults] --> S[stabilizer<br/>measurements]
+    S --> D{{DECODER}}
+    D -->|correct guess| OK[logical qubit<br/>survives]
+    D -->|wrong guess| X[logical qubit<br/>corrupts]
+    style D fill:#7c3aed,color:#fff
+```
+
+Every decoder decodes against an **assumed noise model**. On real
+hardware the true noise is different — biased, correlated, drifting:
+
+```mermaid
+flowchart TB
+    subgraph real[" reality "]
+        TN[true noise<br/>biased + correlated] --> C[quantum circuit]
+        C --> SY[syndrome data<br/>detection events]
+    end
+    subgraph assumed[" decoder's belief "]
+        AM[assumed model<br/>i.i.d. depolarizing] --> MW[MWPM<br/>edge weights]
+    end
+    SY --> MW
+    MW --> DEC[correction]
+    TN -.->|mismatch = decoding errors| MW
+    SY -.->|"this project: refit weights<br/>from the data itself"| MW
+    style real fill:#fef3c7
+    style assumed fill:#f3efff
+```
+
+## What we measured — where the room actually is
+
+```mermaid
+flowchart TD
+    N[true noise] --> Q{edge-representable<br/>on the matching graph?}
+    Q -->|depolarizing| A[MWPM near-optimal<br/>learned decoder loses: ~12% vs 5.2%]
+    Q -->|"biased / rate-miscalibrated<br/>(still edge-representable)"| B[MWPM indifferent<br/>oracle gains only ~2%]
+    Q -->|"multi-body correlated<br/>leakage, crosstalk, bursts"| C["MWPM CAN'T represent it<br/>= the only regime a learned<br/>decoder can win →"]
+    style A fill:#fee2e2
+    style B fill:#fef3c7
+    style C fill:#d1fae5
+```
+
+The first two rows are measured in this repo. The third is the next
+experiment — it is also why Google's AlphaQubit only showed its
+advantage on *real device* noise.
+
 ## Scripts
 
 | Script | What it does |
