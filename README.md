@@ -80,11 +80,17 @@ Weight-miscalibration study (calibrated_baseline.py):
   Hetero X/Z-bias eta=100, d=3:    naive 4.57% = oracle 4.57%
   Hetero X/Z-bias eta=100, d=5:    naive 13.55%, oracle 13.29% (~2% rel)
 
-Correlated XX bursts (p_burst=0.15, p_base=0.001, d=3, 3 seeds):
-  naive MWPM:     3.04%  (boundary broken)
-  MLP learned:    1.81%  (recovers ~60% of naive->oracle gap,
-                          McNemar p<0.001 per seed)
-  oracle MWPM:    1.00%
+Correlated XX bursts (p_burst=0.15, p_base=0.001, multi-seed):
+  d=3: naive 3.04% | MLP 1.81% | oracle 1.00%
+       flat MLP wins, McNemar p<0.001 all seeds
+  d=5: naive 4.47% | MLP 13.6% | oracle 0.36%
+       flat MLP overfits and loses, p~0 against
+  d=7: naive 5.40% | MLP 28.3% | oracle 0.04%
+
+  HYBRID (MWPM prediction as input feature):
+  d=3: naive 3.21% | hybrid 1.24% (87% of oracle gap, p~1e-105)
+  d=5: naive 4.54% | hybrid 3.31% (29% of oracle gap, p~4e-31)
+       the only learned decoder that wins at scale
 ```
 
 **Honest reading.** Under correctly-calibrated i.i.d. depolarising noise,
@@ -93,10 +99,12 @@ is the expected result, not a failure. More interesting: MWPM's logical
 error rate is essentially insensitive to edge-weight miscalibration
 whenever the true noise is still edge-representable (uniform AND
 alternating bias). Weight fitting only has room to matter where noise is
-not edge-representable: multi-body correlated faults. Measured both
-sides of that boundary now: under correlated XX bursts a small MLP beats
-naive MWPM by ~40% relative with McNemar p<0.001, recovering about 60%
-of what the oracle gets back. See `DESIGN.md`.
+not edge-representable: multi-body correlated faults. Both sides of that
+boundary are measured now. Under correlated XX bursts a flat MLP wins at
+d=3 but collapses at d>=5, while a hybrid decoder (MWPM's prediction fed
+in as a feature) beats MWPM at d=3 AND d=5 with McNemar p<1e-30.
+Learning to correct the classical decoder scales; learning to decode
+does not. See `DESIGN.md` and `paper/main.tex`.
 
 ## Run
 

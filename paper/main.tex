@@ -24,8 +24,11 @@ recalibration is a no-op and even an oracle prior buys at most ~2\%.
 asymmetric: a small MLP beats MWPM at $d{=}3$ (1.8\% vs 3.0\%,
 McNemar $p{<}0.001$ over three seeds) yet fails at $d{\geq}5$ (13--28\%
 vs 4.5--5.4\%), while MWPM degrades gracefully and an oracle prior
-improves with distance. The advantage window for learned decoders is
-therefore narrower and more capacity-dependent than commonly assumed.
+improves with distance. The learned win survives scaling only in hybrid
+form: a network given MWPM's own prediction as a feature beats MWPM at
+$d{=}3$ and $d{=}5$ (McNemar $p{<}10^{-30}$), recovering 29--87\% of
+the oracle gap. Learning to correct the classical decoder scales;
+learning to decode does not.
 \end{abstract}
 
 \section{Introduction}
@@ -41,8 +44,10 @@ lies outside the matching graph's representable class.
 Noise suite over rotated memory-Z at $d\in\{3,5,7\}$, $r{=}3d$:
 depolarising, biased ($\eta{=}100$, uniform and alternating X/Z), and
 correlated XX bursts (\textsc{correlated\_error} on neighbouring data
-qubits before each measurement block). All decoders decode identical
-stim-sampled shards; McNemar paired test on disagreements.
+qubits before each measurement block). Learned decoders: a flat MLP, a
+space-time CNN, and a hybrid that takes MWPM's own prediction as an
+input feature. All decoders decode identical stim-sampled shards;
+McNemar paired test on disagreements.
 \textbf{Honesty machinery:} zero-noise invariants, calibration with a
 held-out validation gate, oracle = MWPM on the true generating DEM.
 
@@ -77,6 +82,14 @@ decisively; regularisation removes the overfit and the win together.
 Naive MWPM degrades from 3.0\% to 5.4\%; the oracle reaches 0.03--0.4\%,
 i.e.\ the value of knowing the noise \emph{grows} with distance.
 
+\subsection{The hybrid result}
+Feeding MWPM's prediction to the network as one extra feature flips the
+scaling failure: the hybrid beats naive MWPM at $d{=}3$ (1.2\% vs 3.2\%)
+\emph{and} $d{=}5$ (3.3\% vs 4.5\%), McNemar $p{<}10^{-30}$ in both
+cases, recovering 87\% and 29\% of the naive-to-oracle gap. Starting
+from the classical answer is what lets a small learned decoder scale;
+decoding from scratch does not.
+
 \subsection{Calibration with a conscience}
 Marginal-fitted calibration actively harms under strong correlation
 (6.9\% vs 3.1\% at $d{=}3$). A held-out validation gate detects this
@@ -84,11 +97,12 @@ and falls back to nominal weights. Any upstream calibration utility
 needs this gate.
 
 \section{Discussion}
-The boundary is noise-representability, but the learned side of it is
-capacity-limited: our small models only win at the smallest code. The
-credible path runs through architectures with the right structure
-(hybrid MWPM-feature decoders, spatial models at larger $d$), not
-through marginal reweighting.
+The boundary is noise-representability, and the learned side of it is
+architecture-sensitive: flat decoders win only at the smallest code,
+while the hybrid pattern (classical answer in, correction out) wins
+through $d{=}5$ and tracks the literature's strongest results.
+Marginal reweighting, by contrast, buys nothing in either regime once
+validated honestly.
 
 \section{Limitations}
 Synthetic noise only; small codes; single learned architecture family

@@ -1,0 +1,4 @@
+burst injection: 4 CORRELATED_ERROR XX pairs at p=0.15 across 4 qubit pairs
+d=3: naive=0.0321 hybrid=0.0124 oracle=0.0105 (18s) mcnemar p=9.07e-105
+burst injection: 12 CORRELATED_ERROR XX pairs at p=0.15 across 12 qubit pairs
+d=5: naive=0.0454 hybrid=0.0331 oracle=0.0039 (19s) mcnemar p=4.42e-31
