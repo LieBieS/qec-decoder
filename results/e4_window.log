@@ -1,0 +1,23 @@
+burst injection: 12 CORRELATED_ERROR XX pairs at p=0.02 across 12 qubit pairs
+    epoch  5/40  loss=0.1764
+    epoch 10/40  loss=0.0534
+    epoch 15/40  loss=0.0180
+    epoch 20/40  loss=0.0061
+    epoch 25/40  loss=0.0018
+    epoch 30/40  loss=0.0007
+    epoch 35/40  loss=0.0003
+    epoch 40/40  loss=0.0001
+p_burst=0.02: naive=0.0013 mlp=0.0783 oracle=0.0007 | obs_rate=0.154
+burst injection: 12 CORRELATED_ERROR XX pairs at p=0.05 across 12 qubit pairs
+    epoch  5/40  loss=0.1960
+    epoch 10/40  loss=0.0687
+    epoch 15/40  loss=0.0280
+    epoch 20/40  loss=0.0110
+    epoch 25/40  loss=0.0043
+    epoch 30/40  loss=0.0384
+    epoch 35/40  loss=0.0020
+    epoch 40/40  loss=0.0011
+p_burst=0.05: naive=0.0047 mlp=0.0901 oracle=0.0008 | obs_rate=0.175
+burst injection: 12 CORRELATED_ERROR XX pairs at p=0.08 across 12 qubit pairs
+    epoch  5/40  loss=0.2216
+    epoch 10/40  loss=0.0875

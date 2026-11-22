@@ -1,0 +1,60 @@
+burst injection: 12 CORRELATED_ERROR XX pairs at p=0.15 across 12 qubit pairs
+    epoch  5/40  loss=0.2956
+    epoch 10/40  loss=0.1579
+    epoch 15/40  loss=0.0862
+    epoch 20/40  loss=0.0453
+    epoch 25/40  loss=0.0228
+    epoch 30/40  loss=0.0132
+    epoch 35/40  loss=0.0077
+    epoch 40/40  loss=0.0047
+d=5 seed=1: naive=0.0454 mlp=0.1382 oracle=0.0039 | mcnemar b=932 c=3718 p=0.00e+00
+burst injection: 12 CORRELATED_ERROR XX pairs at p=0.15 across 12 qubit pairs
+    epoch  5/40  loss=0.2884
+    epoch 10/40  loss=0.1457
+    epoch 15/40  loss=0.0734
+    epoch 20/40  loss=0.0358
+    epoch 25/40  loss=0.0175
+    epoch 30/40  loss=0.0232
+    epoch 35/40  loss=0.0063
+    epoch 40/40  loss=0.0037
+d=5 seed=2: naive=0.0450 mlp=0.1345 oracle=0.0036 | mcnemar b=953 c=3638 p=0.00e+00
+burst injection: 12 CORRELATED_ERROR XX pairs at p=0.15 across 12 qubit pairs
+    epoch  5/40  loss=0.2901
+    epoch 10/40  loss=0.1523
+    epoch 15/40  loss=0.0833
+    epoch 20/40  loss=0.0451
+    epoch 25/40  loss=0.0238
+    epoch 30/40  loss=0.0237
+    epoch 35/40  loss=0.0078
+    epoch 40/40  loss=0.0047
+d=5 seed=3: naive=0.0436 mlp=0.1344 oracle=0.0032 | mcnemar b=929 c=3653 p=0.00e+00
+burst injection: 24 CORRELATED_ERROR XX pairs at p=0.15 across 24 qubit pairs
+    epoch  5/40  loss=0.3714
+    epoch 10/40  loss=0.0482
+    epoch 15/40  loss=0.0037
+    epoch 20/40  loss=0.0009
+    epoch 25/40  loss=0.0004
+    epoch 30/40  loss=0.0002
+    epoch 35/40  loss=0.0001
+    epoch 40/40  loss=0.0000
+d=7 seed=1: naive=0.0554 mlp=0.2824 oracle=0.0004 | mcnemar b=897 c=6573 p=0.00e+00
+burst injection: 24 CORRELATED_ERROR XX pairs at p=0.15 across 24 qubit pairs
+    epoch  5/40  loss=0.3867
+    epoch 10/40  loss=0.0470
+    epoch 15/40  loss=0.0038
+    epoch 20/40  loss=0.0011
+    epoch 25/40  loss=0.0005
+    epoch 30/40  loss=0.0002
+    epoch 35/40  loss=0.0001
+    epoch 40/40  loss=0.0001
+d=7 seed=2: naive=0.0537 mlp=0.2885 oracle=0.0003 | mcnemar b=876 c=6745 p=0.00e+00
+burst injection: 24 CORRELATED_ERROR XX pairs at p=0.15 across 24 qubit pairs
+    epoch  5/40  loss=0.3585
+    epoch 10/40  loss=0.0312
+    epoch 15/40  loss=0.0030
+    epoch 20/40  loss=0.0010
+    epoch 25/40  loss=0.0005
+    epoch 30/40  loss=0.0002
+    epoch 35/40  loss=0.0001
+    epoch 40/40  loss=0.0001
+d=7 seed=3: naive=0.0530 mlp=0.2778 oracle=0.0005 | mcnemar b=912 c=6532 p=0.00e+00

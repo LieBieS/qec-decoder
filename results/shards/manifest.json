@@ -1,0 +1,38 @@
+{
+  "depolarising_d3": {
+    "builder": "build_circuit",
+    "kwargs": {
+      "distance": 3,
+      "rounds": 9,
+      "noise": 0.005
+    },
+    "sampler_seed": 11,
+    "shots": 50000,
+    "n_detectors": 72
+  },
+  "biased_hetero_d3": {
+    "builder": "biased_circuit",
+    "kwargs": {
+      "distance": 3,
+      "rounds": 9,
+      "noise": 0.005,
+      "eta": 100.0,
+      "hetero": true
+    },
+    "sampler_seed": 12,
+    "shots": 50000,
+    "n_detectors": 72
+  },
+  "burst_d3": {
+    "builder": "burst_circuit",
+    "kwargs": {
+      "distance": 3,
+      "rounds": 9,
+      "noise": 0.001,
+      "p_burst": 0.15
+    },
+    "sampler_seed": 13,
+    "shots": 50000,
+    "n_detectors": 72
+  }
+}

@@ -89,6 +89,35 @@ class TransformerDecoder(nn.Module):
         return self.head(out.mean(dim=1)).squeeze(-1)
 
 
+class ConvDecoder(nn.Module):
+    """Syndrome as a space-time image: each detector bit scattered to its
+    (t, y, x) grid cell, time as input channels. The spatial inductive
+    bias the MLP lacks; built for the correlated-noise regime where
+    locality structure is the signal."""
+
+    def __init__(self, coords):
+        super().__init__()
+        # coords: dict det_id -> (x, y, t)
+        self.T = int(max(c[2] for c in coords.values())) + 1
+        self.H = int(max(c[1] for c in coords.values())) + 1
+        self.W = int(max(c[0] for c in coords.values())) + 1
+        idx = torch.zeros(len(coords), 3, dtype=torch.long)
+        for i, c in coords.items():
+            idx[i] = torch.tensor([int(c[2]), int(c[1]), int(c[0])])
+        self.register_buffer("idx", idx)
+        self.conv = nn.Sequential(
+            nn.Conv2d(self.T, 32, 3, padding=1), nn.ReLU(),
+            nn.Conv2d(32, 32, 3, padding=1), nn.ReLU(),
+            nn.Conv2d(32, 8, 1), nn.ReLU())
+        self.head = nn.Linear(8 * self.H * self.W, 1)
+
+    def forward(self, x):
+        grid = torch.zeros(x.shape[0], self.T, self.H, self.W,
+                           device=x.device)
+        grid[:, self.idx[:, 0], self.idx[:, 1], self.idx[:, 2]] = x
+        return self.head(self.conv(grid).flatten(1)).squeeze(-1)
+
+
 def train_decoder(model, X_tr, y_tr, X_te, y_te, epochs=30, bs=512, lr=3e-4):
     torch.manual_seed(SEED)
     opt = torch.optim.Adam(model.parameters(), lr=lr)
